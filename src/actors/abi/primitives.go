@@ -44,8 +44,3 @@ type TokenAmount int64 // TODO bigint
 // Randomness is a string of random bytes
 type Randomness []byte
 
-// The unit of storage power (measured in bytes)
-type StoragePower int64 // TODO bigint
-
-// The unit of sector weight (power-epochs)
-type SectorWeight int64 // TODO bigint

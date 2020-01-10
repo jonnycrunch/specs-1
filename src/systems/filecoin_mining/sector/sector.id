@@ -1,3 +1,4 @@
+import abi "github.com/filecoin-project/specs/actors/abi"
 import piece "github.com/filecoin-project/specs/systems/filecoin_files/piece"
 import ipld "github.com/filecoin-project/specs/libraries/ipld"
 import deal "github.com/filecoin-project/specs/systems/filecoin_markets/storage_market/storage_deal"
@@ -5,33 +6,10 @@ import addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address
 
 type Bytes32 Bytes
 type Commitment Bytes32  // TODO
-type UnsealedSectorCID ipld.CID
-type SealedSectorCID ipld.CID
-
-// SectorNumber is a numeric identifier for a sector. It is usually
-// relative to a Miner.
-type SectorNumber UInt
 
 type FaultSet CompactSectorSet
 type StorageFaultType int
 
-// SectorSize indicates one of a set of possible sizes in the network.
-type SectorSize UInt
-
-// Ideally, SectorSize would be an enum
-// type SectorSize enum {
-//   1KiB = UInt 1024
-//   1MiB = Uint 1048576
-//   1GiB = Uint 1073741824
-//   1TiB = Uint 1099511627776
-//   1PiB = Uint 1125899906842624
-// }
-
-// TODO make sure this is globally unique
-type SectorID struct {
-    Miner   addr.ActorID
-    Number  SectorNumber
-}
 
 // SectorInDetail describes all the bits of information associated
 // with each sector.
@@ -41,7 +19,7 @@ type SectorID struct {
 // NOTE: do not use this struct. It is for illustrative purposes only.
 type SectorInDetail struct {
     ID    SectorID
-    Size  SectorSize
+    Size  abi.SectorSize
 
     Unsealed struct {
         CID     UnsealedSectorCID
@@ -71,7 +49,7 @@ type SectorInfo struct {
 // UnsealedSectorInfo is an object that tracks the relevant data to keep in a sector
 type UnsealedSectorInfo struct {
     UnsealedCID  UnsealedSectorCID  // CommD
-    Size         SectorSize
+    Size         abi.SectorSize
     PieceCount   UVarint  // number of pieces in this sector (can get it from len(Pieces) too)
     Pieces       [piece.PieceInfo]  // wont get externalized easy, -- it's big
     SealCfg  // this will be here as well. it's determined.
@@ -81,7 +59,7 @@ type UnsealedSectorInfo struct {
 // SealedSectorInfo keeps around information about a sector that has been sealed.
 type SealedSectorInfo struct {
     SealedCID  SealedSectorCID
-    Size       SectorSize
+    Size       abi.SectorSize
     SealCfg
     SealArgs   SealArguments
 }

@@ -11,7 +11,6 @@ import (
 	autil "github.com/filecoin-project/specs/actors/util"
 	filcrypto "github.com/filecoin-project/specs/algorithms/crypto"
 	libp2p "github.com/filecoin-project/specs/libraries/libp2p"
-	sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 	ai "github.com/filecoin-project/specs/systems/filecoin_vm/actor_interfaces"
 )
@@ -64,7 +63,7 @@ func (a *StoragePowerActorCode_I) WithdrawBalance(rt Runtime, minerAddr addr.Add
 	rt.SendFunds(recipientAddr, amountExtracted)
 }
 
-func (a *StoragePowerActorCode_I) CreateMiner(rt Runtime, workerAddr addr.Address, sectorSize sector.SectorSize, peerId libp2p.PeerID) addr.Address {
+func (a *StoragePowerActorCode_I) CreateMiner(rt Runtime, workerAddr addr.Address, sectorSize abi.SectorSize, peerId libp2p.PeerID) addr.Address {
 	vmr.RT_ValidateImmediateCallerIsSignable(rt)
 	ownerAddr := rt.ImmediateCaller()
 

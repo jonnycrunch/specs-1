@@ -4,7 +4,6 @@ import (
 	abi "github.com/filecoin-project/specs/actors/abi"
 	actor_util "github.com/filecoin-project/specs/actors/util"
 	deal "github.com/filecoin-project/specs/systems/filecoin_markets/storage_market/storage_deal"
-	sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 )
 
 var PARAM_FINISH = actor_util.PARAM_FINISH
@@ -61,7 +60,7 @@ func (inds *Indices_I) StorageDeal_ClientCollateralBounds(
 }
 
 func (inds *Indices_I) SectorWeight(
-	sectorSize sector.SectorSize,
+	sectorSize abi.SectorSize,
 	startEpoch abi.ChainEpoch,
 	endEpoch abi.ChainEpoch,
 	dealWeight deal.DealWeight,
@@ -143,7 +142,7 @@ func (inds *Indices_I) StoragePower_PledgeSlashForSurprisePoStFailure(
 }
 
 func (inds *Indices_I) StorageMining_PreCommitDeposit(
-	sectorSize sector.SectorSize,
+	sectorSize abi.SectorSize,
 	expirationEpoch abi.ChainEpoch,
 ) abi.TokenAmount {
 	PARAM_FINISH()

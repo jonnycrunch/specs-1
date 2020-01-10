@@ -209,7 +209,7 @@ func (f *Feistel_I) Permute(size UInt, i UInt) UInt {
 	panic("TODO")
 }
 
-func (sdr *WinStackedDRG_I) Seal(sid sector.SectorID, data []byte, randomness sector.SealRandomness) SealSetupArtifacts {
+func (sdr *WinStackedDRG_I) Seal(sid abi.SectorID, data []byte, randomness abi.SealRandomness) SealSetupArtifacts {
 	windowCount := int(sdr.WindowCount())
 	nodeSize := int(sdr.NodeSize())
 	nodes := int(sdr.Nodes())

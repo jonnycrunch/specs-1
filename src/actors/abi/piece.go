@@ -6,15 +6,13 @@ import (
 )
 
 // PieceCID is the main reference to pieces in Filecoin. It is the CID of the piece.
-type PieceCID struct {
-	cid.Cid
-}
+type PieceCID cid.Cid
 
 func PieceCIDOf(data []byte) PieceCID {
 	b := cid.V1Builder{Codec: cid.DagCBOR, MhType: mh.SHA2_256}
 	c, err := b.Sum(data)
 	assertNoError(err)
-	return PieceCID{c}
+	return PieceCID(c)
 }
 
 // PieceSize is the size of a piece, in bytes
@@ -25,10 +23,4 @@ type PieceSize struct {
 
 func (p PieceSize) Total() int64 {
 	return p.PayloadSize + p.OverheadSize
-}
-
-func assertNoError(e error) {
-	if e != nil {
-		panic(e.Error())
-	}
 }

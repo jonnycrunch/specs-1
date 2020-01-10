@@ -4,8 +4,6 @@ import address "github.com/filecoin-project/specs/systems/filecoin_vm/actor/addr
 import deal "github.com/filecoin-project/specs/systems/filecoin_markets/storage_market/storage_deal"
 import filcrypto "github.com/filecoin-project/specs/algorithms/crypto"
 import libp2p "github.com/filecoin-project/specs/libraries/libp2p"
-import sealing "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
-import sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 
 type MinerPoStState union {
     // Normal operation: The miner has passed either an ElectionPoSt or a SurprisePoSt
@@ -18,7 +16,7 @@ type MinerPoStState union {
     // and as a result, the system has fallen back to proving storage via SurprisePoSt.
     Challenged struct {
         SurpriseChallengeEpoch  abi.ChainEpoch
-        ChallengedSectors       [sector.SectorNumber]
+        ChallengedSectors       [abi.SectorNumber]
         NumConsecutiveFailures  int
     }
 
@@ -39,7 +37,7 @@ type SectorState enum {
 
 type SectorOnChainInfo struct {
     State                       SectorState
-    Info                        sealing.SectorPreCommitInfo  // Also contains Expiration field.
+    Info                        abi.SectorPreCommitInfo  // Also contains Expiration field.
     PreCommitDeposit            abi.TokenAmount
     PreCommitEpoch              abi.ChainEpoch
     ActivationEpoch             abi.ChainEpoch  // -1 if still in PreCommit state.
@@ -55,9 +53,70 @@ type SectorOnChainInfo struct {
     Is_TemporaryFault()         bool
 }
 
-type SectorsAMT {sector.SectorNumber: SectorOnChainInfo}
+type SealCfg struct {
+    SectorSize   abi.SectorSize
+    WindowCount  UInt
+    Partitions   UInt
+}
 
-type SectorNumberSetHAMT {sector.SectorNumber: bool}
+// SealVerifyInfo is the structure of all the information a verifier
+// needs to verify a Seal.
+type SealVerifyInfo struct {
+    SectorID
+    OnChain                OnChainSealVerifyInfo
+    SealCfg
+    Randomness             SealRandomness
+    InteractiveRandomness  InteractiveSealRandomness
+    UnsealedCID            abi.UnsealedSectorCID  // CommD
+}
+
+// OnChainSealVerifyInfo is the structure of information that must be sent with
+// a message to commit a sector. Most of this information is not needed in the
+// state tree but will be verified in sm.CommitSector. See SealCommitment for
+// data stored on the state tree for each sector.
+type OnChainSealVerifyInfo struct {
+    SealedCID         abi.SealedSectorCID  // CommR
+    SealEpoch         abi.ChainEpoch
+    InteractiveEpoch  abi.ChainEpoch
+    Proof             SealProof
+    DealIDs           deal.DealIDs
+    SectorNumber
+}
+
+type SealRandomness Bytes
+type InteractiveSealRandomness Bytes
+
+// Can move to a new posting.id if we think worth it.
+type PoStCfg struct {
+    Type         PoStType
+    SectorSize
+    WindowCount  UInt
+    Partitions   UInt
+}
+
+// TODO: refactor these types to get rid of the squishy optional fields.
+type PoStVerifyInfo struct {
+    PoStCfg
+    Randomness  PoStRandomness
+    CommR       SealedSectorCID
+    OnChain     OnChainPoStVerifyInfo
+}
+
+type OnChainPoStVerifyInfo struct {
+    CommT       ChallengeTicketsCommitment  // Optional — only needed for SurprisePoSt.
+    Candidates  [PoStCandidate]
+    Randomness  PoStRandomness
+    Proof       PoStProof
+}
+
+type PoStType enum {
+    ElectionPoSt
+    SurprisePoSt
+}
+
+type SectorsAMT {abi.SectorNumber: SectorOnChainInfo}
+
+type SectorNumberSetHAMT {abi.SectorNumber: bool}
 
 // Balance of a StorageMinerActor should equal exactly the sum of PreCommit deposits
 // that are not yet returned or burned.
@@ -67,13 +126,13 @@ type StorageMinerActorState struct {
     ProvingSet  SectorNumberSetHAMT
     Info        MinerInfo
 
-    GetStorageWeightDescForSectorMaybe(sectorNumber sector.SectorNumber) (ret autil.SectorStorageWeightDesc, ok bool)
-    _getStorageWeightDescForSector(sectorNumber sector.SectorNumber) autil.SectorStorageWeightDesc
-    _getStorageWeightDescsForSectors(sectorNumbers [sector.SectorNumber]) [autil.SectorStorageWeightDesc]
+    GetStorageWeightDescForSectorMaybe(sectorNumber abi.SectorNumber) (ret autil.SectorStorageWeightDesc, ok bool)
+    _getStorageWeightDescForSector(sectorNumber abi.SectorNumber) autil.SectorStorageWeightDesc
+    _getStorageWeightDescsForSectors(sectorNumbers [abi.SectorNumber]) [autil.SectorStorageWeightDesc]
 
-    _getSectorDealIDsAssert(sectorNumber sector.SectorNumber) deal.DealIDs
+    _getSectorDealIDsAssert(sectorNumber abi.SectorNumber) deal.DealIDs
 
-    VerifySurprisePoStMeetsTargetReq(candidate sector.PoStCandidate) bool
+    VerifySurprisePoStMeetsTargetReq(candidate abi.PoStCandidate) bool
 }
 
 type StorageMinerActorCode struct {
@@ -98,7 +157,7 @@ type MinerInfo struct {
     PeerId                  libp2p.PeerID
 
     // Amount of space in each sector committed to the network by this miner.
-    SectorSize              sector.SectorSize
+    SectorSize              abi.SectorSize
     WindowCount             UVarint
     SealPartitions          UVarint
     ElectionPoStPartitions  UVarint

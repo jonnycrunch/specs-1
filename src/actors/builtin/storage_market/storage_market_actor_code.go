@@ -6,7 +6,6 @@ import (
 	vmr "github.com/filecoin-project/specs/actors/runtime"
 	actor_util "github.com/filecoin-project/specs/actors/util"
 	deal "github.com/filecoin-project/specs/systems/filecoin_markets/storage_market/storage_deal"
-	sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 )
 
@@ -120,7 +119,7 @@ func (a *StorageMarketActorCode_I) PublishStorageDeals(rt Runtime, newStorageDea
 }
 
 // Note: in the case of a capacity-commitment sector (one with zero deals), this function should succeed vacuously.
-func (a *StorageMarketActorCode_I) VerifyDealsOnSectorPreCommit(rt Runtime, dealIDs deal.DealIDs, sectorInfo sector.SectorPreCommitInfo) {
+func (a *StorageMarketActorCode_I) VerifyDealsOnSectorPreCommit(rt Runtime, dealIDs deal.DealIDs, sectorInfo abi.SectorPreCommitInfo) {
 	rt.ValidateImmediateCallerAcceptAnyOfType(builtin.StorageMinerActorCodeID)
 	minerAddr := rt.ImmediateCaller()
 
@@ -134,7 +133,7 @@ func (a *StorageMarketActorCode_I) VerifyDealsOnSectorPreCommit(rt Runtime, deal
 	Release(rt, h, st)
 }
 
-func (a *StorageMarketActorCode_I) UpdateDealsOnSectorProveCommit(rt Runtime, dealIDs deal.DealIDs, sectorInfo sector.SectorProveCommitInfo) {
+func (a *StorageMarketActorCode_I) UpdateDealsOnSectorProveCommit(rt Runtime, dealIDs deal.DealIDs, sectorInfo abi.SectorProveCommitInfo) {
 	rt.ValidateImmediateCallerAcceptAnyOfType(builtin.StorageMinerActorCodeID)
 	minerAddr := rt.ImmediateCaller()
 
@@ -149,24 +148,24 @@ func (a *StorageMarketActorCode_I) UpdateDealsOnSectorProveCommit(rt Runtime, de
 	UpdateRelease(rt, h, st)
 }
 
-func (a *StorageMarketActorCode_I) GetPieceInfosForDealIDs(rt Runtime, dealIDs deal.DealIDs) sector.PieceInfos {
+func (a *StorageMarketActorCode_I) GetPieceInfosForDealIDs(rt Runtime, dealIDs deal.DealIDs) abi.PieceInfos {
 	rt.ValidateImmediateCallerAcceptAnyOfType(builtin.StorageMinerActorCodeID)
 
-	ret := []sector.PieceInfo{}
+	ret := []abi.PieceInfo{}
 
 	h, st := a.State(rt)
 
 	for _, dealID := range dealIDs.Items() {
 		_, dealP := st._rtGetOnChainDealOrAbort(rt, dealID)
-		ret = append(ret, sector.PieceInfo_I{
-			PieceCID_: dealP.PieceCID(),
-			Size_:     uint64(dealP.PieceSize().Total()),
+		ret = append(ret, abi.PieceInfo{
+			PieceCID: dealP.PieceCID(),
+			Size:     uint64(dealP.PieceSize().Total()),
 		}.Ref())
 	}
 
 	Release(rt, h, st)
 
-	return &sector.PieceInfos_I{Items_: ret}
+	return abi.PieceInfos{Items: ret}
 }
 
 func (a *StorageMarketActorCode_I) GetWeightForDealSet(rt Runtime, dealIDs deal.DealIDs) deal.DealWeight {
