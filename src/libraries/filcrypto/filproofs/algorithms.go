@@ -10,12 +10,13 @@ import (
 	"encoding/binary"
 	big "math/big"
 
+	abi "github.com/filecoin-project/specs/actors/abi"
 	file "github.com/filecoin-project/specs/systems/filecoin_files/file"
-	piece "github.com/filecoin-project/specs/systems/filecoin_files/piece"
 	sector "github.com/filecoin-project/specs/systems/filecoin_mining/sector"
 	sector_index "github.com/filecoin-project/specs/systems/filecoin_mining/sector_index"
 	addr "github.com/filecoin-project/specs/systems/filecoin_vm/actor/address"
 	util "github.com/filecoin-project/specs/util"
+	cid "github.com/ipfs/go-cid"
 )
 
 type SHA256Hash Bytes32
@@ -800,7 +801,7 @@ func ComputeUnsealedSectorCIDFromPieceInfos(sectorSize sector.SectorSize, pieceI
 		return unsealedCID, errors.New("Wrong sector size.")
 	}
 
-	return UnsealedSectorCID(AsBytes_PieceCID(rootPieceInfo.PieceCID())), nil
+	return UnsealedSectorCID(rootPieceInfo.PieceCID().Bytes()), nil
 }
 
 // commD := rootPieceInfo.CommP()
@@ -880,8 +881,10 @@ func zeroPadding(size UInt) PieceInfo {
 func joinPieceInfos(left PieceInfo, right PieceInfo) PieceInfo {
 	util.Assert(left.Size() == right.Size())
 	return &sector.PieceInfo_I{
-		Size_:     left.Size() + right.Size(),
-		PieceCID_: piece.PieceCID(BinaryHash_SHA256Hash(AsBytes_PieceCID(left.PieceCID()), AsBytes_PieceCID(right.PieceCID()))), // FIXME: make this whole function generic?
+		Size_: left.Size() + right.Size(),
+		// TODO: concatenate the bytes of the multihash payloads contained by the CIDS to create a new CID.
+		// FIXME: make this whole function generic?
+		PieceCID_: abi.PieceCID{cid.Undef}, //abi.PieceCID(BinaryHash_SHA256Hash(left.PieceCID().Bytes(), right.PieceCID().Bytes())),
 	}
 }
 
@@ -1385,12 +1388,6 @@ func AsBytes_UnsealedSectorCID(cid sector.UnsealedSectorCID) []byte {
 
 func AsBytes_SealedSectorCID(CID sector.SealedSectorCID) []byte {
 	panic("Unimplemented for SealedSectorCID")
-
-	return []byte{}
-}
-
-func AsBytes_PieceCID(CID piece.PieceCID) []byte {
-	panic("Unimplemented for PieceCID")
 
 	return []byte{}
 }
