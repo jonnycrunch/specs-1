@@ -516,8 +516,8 @@ func (sdr *WinStackedDRG_I) _createPoStCircuitProof(postCfg sector.PoStCfg, priv
 	cfg := postCfg.InstanceCfg().As_PoStCfgV1()
 
 	postProof := sector.PoStProof_I{
-		Type_:          cfg.Type(),
-		ProofInstance_: postCfg.ProofInstance(),
+		Type_:    cfg.Type(),
+		PoStCfg_: postCfg,
 	}
 
 	return &postProof
