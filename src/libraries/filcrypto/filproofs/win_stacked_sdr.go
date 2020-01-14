@@ -353,7 +353,7 @@ func (sdr *WinStackedDRG_I) CreateOfflineCircuitProof(proof PrivateOfflineProof,
 	sealProof := sector.SealProof_I{
 		// TODO: This must also depend on the sector size if more than one size is in the spec.
 		RegisteredProof_: registeredProof,
-		ProofBytes_:    bytes,
+		ProofBytes_:      bytes,
 	}
 
 	return &sealProof

@@ -71,7 +71,7 @@ type PoStWitness struct {
 }
 
 type PoStProof struct {//<curve, system> {
-    Type PoStType,
+    Type PoStType
     PoStCfg
 }
 

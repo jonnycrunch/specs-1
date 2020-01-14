@@ -111,10 +111,10 @@ type ProofType enum {
 // This ordering, defines mappings to UInt in a way which MUST never change.
 // Make that explicit to avoid accidentally violating this constraint.
 type ProofAlgorithm enum {
-    StackedDRGSeal // = 0
-    WinStackedDRGSeal// = 1
-    StackedDRGPoSt //= 2
-    WinStackedDRGPoSt// = 3
+    StackedDRGSeal  // = 0
+    WinStackedDRGSeal  // = 1
+    StackedDRGPoSt  //= 2
+    WinStackedDRGPoSt  // = 3
 }
 
 type ConcreteCircuit struct {

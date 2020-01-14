@@ -1,6 +1,6 @@
 package sector
 
-import 	util "github.com/filecoin-project/specs/util"
+import util "github.com/filecoin-project/specs/util"
 
 // NOTE: It's fairly unclear how any of this should interface/cooperate with filcrypto/filproofs.
 // Leaving now to preserve some historical intent for later refactoring.
